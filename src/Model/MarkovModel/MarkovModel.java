@@ -16,11 +16,10 @@ public abstract class MarkovModel extends Model{
 	protected double[][] alpha;
 	protected double[][] beta; 
 
-	protected ArrayList<Sequence> observation;
 	protected Sequence longesttrace;
 	
 	public MarkovModel(ArrayList<Sequence> s, int cycle, int t) {
-		super(cycle);
+		super(cycle,s);
 		observation = s;
 		T = t;
 	}

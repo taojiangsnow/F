@@ -1,30 +1,30 @@
 package Utils;
 
-public class Matric implements Cloneable{
+public class Matrix implements Cloneable{
 	private int nr;
 	private int nc;
-	double [][] matric;
+	double [][] Matrix;
 	
-	public Matric(int nr, int nc) {
+	public Matrix(int nr, int nc) {
 		this.nr = nr;
 		this.nc = nc;
-		matric = new double[nr][];
+		Matrix = new double[nr][];
 		for (int i = 0; i < nr; i++) {
-			matric[i] = new double[nc];
+			Matrix[i] = new double[nc];
 		}
 	}
 
-	public Matric(double[][] m) {
+	public Matrix(double[][] m) {
 		nr = m.length;
 		nc = m[0].length;
-		matric = new double[nr][];
+		Matrix = new double[nr][];
 		for (int i = 0; i < nr; i++) {
-			matric[i] = new double[nc];
+			Matrix[i] = new double[nc];
 		}
 		
 		for (int i = 0; i < nr; i++) {
 			for (int j = 0 ; j < nc; j++) {
-				matric[i][j] = m[i][j];
+				Matrix[i][j] = m[i][j];
 			}
 		}
 	}
@@ -41,21 +41,21 @@ public class Matric implements Cloneable{
 		for (int i = 0; i < nr; i++) {
 			r[i] = new double[nc];
 			for (int j = 0; j < nc; j++) {
-				r[i][j] = matric[i][j];
+				r[i][j] = Matrix[i][j];
 			}
 		}
 		return r;		
 	}
 	
-	public static void multiply(Matric t, double[][] m) {
+	public static void multiply(Matrix t, double[][] m) {
 		if (t.nc != m.length) {
-			System.out.println("Matric multiply----The dimention does not match! nc "+t.nc+" length "+m.length);
+			System.out.println("Matrix multiply----The dimention does not match! nc "+t.nc+" length "+m.length);
 			return;
 		} else {
 			double sum;
 			int row = t.nr;
 			int col = m[0].length;
-			Matric result = new Matric(row,col);
+			Matrix result = new Matrix(row,col);
 			for (int i = 0; i < row; i++) {
 				for (int j= 0; j < col; j++) {
 					sum = 0.0;
@@ -73,7 +73,7 @@ public class Matric implements Cloneable{
 		}	
 	}		
 
-	public static void multiply(FastVector vector, Matric t) {
+	public static void multiply(FastVector vector, Matrix t) {
 		if (vector.size() != t.nr) {
 			System.out.println("The dimention does not match");
 			return;
@@ -96,39 +96,39 @@ public class Matric implements Cloneable{
 	public double sumOfCol(int c) {
 		double sum = 0.0;
 		for (int i = 0; i < nr; i++) {
-			sum += matric[i][c];
+			sum += Matrix[i][c];
 		}
 		return sum;
 	}
 	
 	public void clear() {
 		for (int i = 0; i < nr; i++) {
-			matric[i] = null;
+			Matrix[i] = null;
 		}
-		matric = null;
+		Matrix = null;
 		nr = 0;
 		nc = 0;
 	}
 
 	public void set(int i, int j, double sum) {
 		if ((i >= nr) || (j >= nc)) {
-			System.out.println("The index exceeds the max dimention of matric");
+			System.out.println("The index exceeds the max dimention of Matrix");
 		} else {
-			matric[i][j] = sum;
+			Matrix[i][j] = sum;
 		}
 	}
 	
 	public void set(int row, double j) {
 		for (int i = 0; i < nc; i++) {
-			matric[row][i] = j;
+			Matrix[row][i] = j;
 		}
 	}
 	
 	public double get(int i, int j) {
 		if ((i >= nr) || (j >= nc)) {
-			System.out.println("The index exceeds the max dimention of matric");
+			System.out.println("The index exceeds the max dimention of Matrix");
 		}
-		return matric[i][j];
+		return Matrix[i][j];
 	}
 
 	public int RowSize() {
@@ -139,7 +139,7 @@ public class Matric implements Cloneable{
 		return nc;
 	}
 	
-	public static void output(Matric m) {
+	public static void output(Matrix m) {
 		for (int i = 0; i < m.nr; i++) {
 			for (int j = 0; j < m.nr; j++) {
 				System.out.print(m.get(i, j)+" ");

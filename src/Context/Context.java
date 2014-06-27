@@ -5,15 +5,15 @@ package Context;
 
 import Utils.Date;
 
-public class Context implements Cloneable{
+public class Context extends PContext implements Cloneable{
 	protected String context;
 	protected Date timestamp;
 	protected int id;
 	protected int index; /*the index in dif_ids*/
 	protected int T;
-	
+	protected int hierarchy_index;
 	/*for complex structure of contexts*/
-	private int parent;
+	private PContext parent;
 	
 	public Context(int i) {
 		index = i;
@@ -74,7 +74,7 @@ public class Context implements Cloneable{
 		return this.context;
 	}
 	
-	public int getParent() {
+	public PContext getParent() {
 		return this.parent;
 	}
 	
@@ -112,5 +112,32 @@ public class Context implements Cloneable{
 		this.context = null;
 		this.timestamp = null;
 	}
+
+	public int getCell() {
+		// TODO Auto-generated method stub
+		if (context.contains(".")) {
+			return Integer.parseInt(context.substring(0, context.indexOf(".")));
+		} else {
+			return 0;
+		}
+	}
+	
+	public int getTower() {
+		if (context.contains(".")) {
+			return Integer.parseInt(context.substring(context.indexOf(".")));
+		} else {
+			return 0;
+		}
+	}
+
+	public void setParent(PContext pContext) {
+		parent = pContext;
+	}
+
+	public void setHierarchyIndex(int index) {
+		hierarchy_index = index;
+		
+	}
+
 }
  

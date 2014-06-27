@@ -5,6 +5,8 @@
 
 package Model;
 
+import java.util.ArrayList;
+
 import SuppressionVector.SupVec;
 import SuppressionVector.SupVec.PartialOutSeq;
 import Utils.Sequence;
@@ -12,10 +14,13 @@ import Utils.Sequence;
 public abstract class Model {
 	//public abstract void setTrainMode(boolean m);
 	protected int trainCycle;
-	public Model(int cycle) {
-		trainCycle = cycle;
-	}
+	protected ArrayList<Sequence> observation;
 	
+	public Model(int cycle, ArrayList<Sequence> s) {
+		trainCycle = cycle;
+		observation = s;
+	}
+
 	public abstract void train();
 	
 	public abstract double getProb(int t, int index, int start, int index2);

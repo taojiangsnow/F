@@ -4,7 +4,7 @@ import Check.SimulatableCheck;
 import Check.Utility.Utility;
 import Main.Maskit;
 import SuppressionVector.SupVec;
-import Utils.Matric;
+import Utils.Matrix;
 import Utils.PreferredSettings;
 
 public class NumberOfReleasedContext extends Utility{
@@ -80,7 +80,7 @@ public class NumberOfReleasedContext extends Utility{
 			}
 		}
 		
-		Matric gammar = new Matric(nr,nc);
+		Matrix gammar = new Matrix(nr,nc);
 		double expected_num_suppressed;
 		for (int i = nr - 2; i >= 0; i--) {
 			for (int j = 0; j < nc; j++) {

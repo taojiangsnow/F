@@ -97,6 +97,7 @@ public class Maskit {
         double utility_simulatable = utility.getUtility();
         System.out.println("Simulatable utility" + utility_simulatable);
         
+        System.out.println(Maskit.T);
         /****************
         int size_observation = t.getObservation().size(); 
         Sequence stemp;

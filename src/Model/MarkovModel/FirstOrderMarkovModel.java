@@ -150,9 +150,9 @@ public class FirstOrderMarkovModel extends MarkovModel{
 
 	@Override
 	public double getPriorProb(int t, int index){
-		Matric temp = new Matric(transition[0]);
+		Matrix temp = new Matrix(transition[0]);
 		for (int n = 1;  n < t; n++) {
-			Matric.multiply(temp, transition[n]);
+			Matrix.multiply(temp, transition[n]);
 		}
 		
 		double sum = temp.sumOfCol(index);
@@ -286,9 +286,9 @@ public class FirstOrderMarkovModel extends MarkovModel{
 		if ((start == Maskit.T) || (start == Maskit.T+1)) {
 			return 1.0;
 		}
-		Matric temp = new Matric(transition[start]);
+		Matrix temp = new Matrix(transition[start]);
 		for (int i = 1; i < step; i++)  {
-			Matric.multiply(temp, transition[start+i]);
+			Matrix.multiply(temp, transition[start+i]);
 		}
 
 		return temp.get(index2, index);
@@ -299,13 +299,13 @@ public class FirstOrderMarkovModel extends MarkovModel{
 		ArrayList<Integer> tresult = new ArrayList<Integer>();
 		FastVector vector = new FastVector(M);
 
-		Matric temp = new Matric(transition[t]);
+		Matrix temp = new Matrix(transition[t]);
 		
 		vector.set(index1, 1.0);
 		//vector.output();
 		
 		for (int n = 1;  n <= step; n++) {
-			Matric.multiply(vector,temp);
+			Matrix.multiply(vector,temp);
 		}
 		
 		for (int i = 0; i < M; i++) {
