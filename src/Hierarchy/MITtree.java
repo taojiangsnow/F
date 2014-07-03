@@ -26,6 +26,7 @@ public class MITtree extends Tree{
 		HashSet<Integer> diff_cell = new HashSet<Integer>();
 		HashSet<Integer> diff_tower = new HashSet<Integer>();
 		double[][][] t_tower_cell;
+		double[][] t_tower;
 		
 		Hierarchy.structure = new ArrayList<Layer>();
 		Layer sigle_layer = new Layer();
@@ -78,6 +79,7 @@ public class MITtree extends Tree{
 		
 		setInnerNodeNum(cell_list.size());
 		t_tower_cell = new double[Maskit.T][tower_list.size()][cell_list.size()];
+		t_tower = new double[Maskit.T][tower_list.size()];
 		
 		for (int i = 0; i < s.size(); i++) {
 			q = s.get(i);
@@ -95,13 +97,31 @@ public class MITtree extends Tree{
 				pc.setT(c.getT());
 				c.setParent(pc);
 				
-				t_tower_cell[c.getT()][pc.getHierarchyIndex()][tower_list.indexOf(c.getTower())] += 1.0;
+				if ((c.getT() != 0) && (c.getT() != Maskit.T)) {
+					t_tower_cell[c.getT()][pc.getHierarchyIndex()][tower_list.indexOf(c.getTower())] += 1.0;
+					t_tower[c.getT()][pc.getHierarchyIndex()] += 1.0;
+				}
 				
 				/*set the index in each parent's domain*/
 				c.setHierarchyIndex(pc.findChild(c.getTower()));
 			}
 		}
 		
+		PContext pc;
+		for (int i = 0; i < s.size(); i++) {
+			q = s.get(i);			
+			for (int j = 0; j < q.getLength(); j++) {
+				c = q.getContext(j);
+				pc = c.getParent();
+				if ((c.getT() != 0) && (c.getT() != Maskit.T)) {
+					if (t_tower[c.getT()][pc.getHierarchyIndex()] != 0) {
+						c.setProbToParent(t_tower_cell[c.getT()][pc.getHierarchyIndex()][c.getHierarchyIndex()]/t_tower[c.getT()][pc.getHierarchyIndex()]);
+					}
+				} else {
+					c.setProbToParent(1.0);
+				}
+			}
+		}
 		
 		it = cell_tower_list.keySet().iterator();
 		while (it.hasNext()) {

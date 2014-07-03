@@ -14,6 +14,7 @@ public class Context extends PContext implements Cloneable{
 	protected int hierarchy_index;
 	/*for complex structure of contexts*/
 	private PContext parent;
+	private double prob_to_parent;
 	
 	public Context(int i) {
 		index = i;
@@ -137,6 +138,10 @@ public class Context extends PContext implements Cloneable{
 	public void setHierarchyIndex(int index) {
 		hierarchy_index = index;
 		
+	}
+
+	public void setProbToParent(double p) {
+		prob_to_parent = p;
 	}
 
 }
