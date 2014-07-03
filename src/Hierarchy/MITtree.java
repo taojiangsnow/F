@@ -16,40 +16,47 @@ public class MITtree extends Tree{
 		structure = new ArrayList<Layer>();
 	}
 	
-	public void train(ArrayList<Sequence> s) {
-		HashMap<Integer,HashSet<Integer>> cell_tower_set = new HashMap<Integer,HashSet<Integer>>();
-		Sequence q;
-		Context c;
-		int cell,tower,t;
-		Iterator<Integer> it;
-		HashMap<Integer,ArrayList<Integer>> cell_tower_list = new HashMap<Integer, ArrayList<Integer>>();
+	public void initial(ArrayList<Sequence> s) {		
+		HashMap<Integer,HashSet<Integer>> cell_tower_set = new HashMap<Integer,HashSet<Integer>>(); //store different cell_tower
+		HashMap<Integer,ArrayList<Integer>> cell_tower_list = new HashMap<Integer, ArrayList<Integer>>(); //store all cell_tower
+		HashMap<Integer,ArrayList<Context>> cell_context_list = new HashMap<Integer, ArrayList<Context>>();
 		HashSet<Integer> diff_cell = new HashSet<Integer>();
 		HashSet<Integer> diff_tower = new HashSet<Integer>();
+		
+		Sequence sq;
+		Context c;
+		Iterator<Integer> it;
 		double[][][] t_tower_cell;
 		double[][] t_tower;
+		int cell,tower;
 		
 		Hierarchy.structure = new ArrayList<Layer>();
+		structure.add(new Layer()); // the bottom layer 
 		Layer sigle_layer = new Layer();
 		Hierarchy.structure.add(sigle_layer);
 		
 		for (int i = 0; i < s.size(); i++) {
-			q = s.get(i);
-			for (int j = 0; j < q.getLength(); j++) {
-				c = q.getContext(j);
-				c.output();
+			sq = s.get(i);
+			for (int j = 0; j < sq.getLength(); j++) {
+				c = sq.getContext(j);
 				cell = c.getCell();
 				tower = c.getTower();
-				t = c.getT();
+				c.output();
+				
 				diff_cell.add(cell);
 				diff_tower.add(tower);
 				System.out.println("  cell "+cell+" tower "+tower);
+				
 				if (!cell_tower_set.containsKey(cell)) {
-					ArrayList<Integer> l = new ArrayList<Integer>();
+					ArrayList<Integer> array = new ArrayList<Integer>();
 					HashSet<Integer> list = new HashSet<Integer>();
+					ArrayList<Context> contextlist = new ArrayList<Context>();
 					list.add(tower);
-					l.add(tower);
+					array.add(tower);
+					contextlist.add(c);
 					cell_tower_set.put(cell, list);
-					cell_tower_list.put(cell, l);
+					cell_tower_list.put(cell, array);
+					cell_context_list.put(cell, contextlist);
 				} else {
 					cell_tower_set.get(cell).add(tower);
 					cell_tower_list.get(cell).add(tower);
@@ -58,43 +65,34 @@ public class MITtree extends Tree{
 			}
 		}
 		
+		/*transfer the hashset to array*/
 		ArrayList<Integer> cell_list = new ArrayList<Integer>(); 
 		ArrayList<Integer> tower_list = new ArrayList<Integer>();
 		it = diff_cell.iterator();
-		//System.out.println("***cell list***");
 		while (it.hasNext()) {
 			int key = it.next();
 			cell_list.add(key);
-			//System.out.print(key+" ");
 		}
-		//System.out.println();
 		it = diff_tower.iterator();
-		//System.out.println("***tower list***");
 		while (it.hasNext()) {
 			int key = it.next();
 			tower_list.add(key);
-			//System.out.print(key+" ");
 		}
-		//System.out.println();
 		
 		setInnerNodeNum(cell_list.size());
 		t_tower_cell = new double[Maskit.T][tower_list.size()][cell_list.size()];
 		t_tower = new double[Maskit.T][tower_list.size()];
 		
 		for (int i = 0; i < s.size(); i++) {
-			q = s.get(i);
-			for (int j = 0; j < q.getLength(); j++) {
-				c = q.getContext(j);
-				PContext pc = new PContext(null,c.getCell(),cell_list.indexOf(c.getCell()));
+			sq = s.get(i);
+			for (int j = 0; j < sq.getLength(); j++) {
+				c = sq.getContext(j);
+				PContext pc = new PContext(null,c.getTimetmp(),c.getCell(),cell_list.indexOf(c.getCell()),c.getT());
 				sigle_layer.add(pc);
 				
-				
 				/*construct childern of the parent*/
-				HashSet<Integer> set = cell_tower_set.get(c.getCell());
-				pc.setChildern(set);
+				pc.setChildren(cell_context_list.get(c.getCell())); 
 				
-				pc.setLayer(1);
-				pc.setT(c.getT());
 				c.setParent(pc);
 				
 				if ((c.getT() != 0) && (c.getT() != Maskit.T)) {
@@ -107,11 +105,12 @@ public class MITtree extends Tree{
 			}
 		}
 		
+		/*get the probability of each tower in the cell*/
 		PContext pc;
 		for (int i = 0; i < s.size(); i++) {
-			q = s.get(i);			
-			for (int j = 0; j < q.getLength(); j++) {
-				c = q.getContext(j);
+			sq = s.get(i);			
+			for (int j = 0; j < sq.getLength(); j++) {
+				c = sq.getContext(j);
 				pc = c.getParent();
 				if ((c.getT() != 0) && (c.getT() != Maskit.T)) {
 					if (t_tower[c.getT()][pc.getHierarchyIndex()] != 0) {

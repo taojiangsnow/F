@@ -17,5 +17,6 @@ public abstract class Hierarchy {
 	
 	public abstract void setInnerNodeNum(int i);
 
-	public abstract void train(ArrayList<Sequence> s);
+	public abstract void initial(ArrayList<Sequence> s);
+
 }

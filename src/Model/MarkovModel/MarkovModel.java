@@ -3,6 +3,7 @@ package Model.MarkovModel;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import Context.PContext;
 import Model.Model;
 import Utils.Sequence;
 
@@ -18,10 +19,18 @@ public abstract class MarkovModel extends Model{
 
 	protected Sequence longesttrace;
 	
+	public MarkovModel() {
+		
+	}
+	
 	public MarkovModel(ArrayList<Sequence> s, int cycle, int t) {
 		super(cycle,s);
 		observation = s;
 		T = t;
+	}
+	
+	public MarkovModel(ArrayList<PContext> s) {
+		pcontext_list = s;
 	}
 	
 	public abstract int getT();

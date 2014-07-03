@@ -3,8 +3,6 @@ package DataInput.Loaders.TrainData;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import Context.Context;
@@ -12,7 +10,6 @@ import DataInput.Filters.SampleByTimeInterval;
 import Main.Maskit;
 import Utils.Sequence;
 import Utils.Date;
-import Utils.TimeMapContext;
 import Utils.PreferredSettings;
 
 public class MITtextLoader extends TxtLoader{
@@ -44,12 +41,14 @@ public class MITtextLoader extends TxtLoader{
 		int curlocid = 0;
 		int lineno = 1;
 		
-		//Maskit.locids = new ArrayList<Integer>(); //a set of location id
-		//Maskit.scontext_id = new HashMap<String,Integer>(); 
-		//Maskit.locids.add(Maskit.start_index); //"start"
-		//Maskit.scontext_id.put("start", -1);
-	    //Maskit.scontext_id.put("end", -2);
-	    
+		/*
+		Maskit.locids = new ArrayList<Integer>(); //a set of location id
+		Maskit.scontext_id = new HashMap<String,Integer>(); 
+		Maskit.locids.add(Maskit.start_index); //"start"
+		Maskit.scontext_id.put("start", -1);
+	    Maskit.scontext_id.put("end", -2);
+	    */
+		
 		System.out.println("lines "+sumlines);
 		
 		line = br.readLine();

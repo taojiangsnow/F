@@ -1,29 +1,55 @@
 package Model.GraphModel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 
 import Model.Model;
+import Model.MarkovModel.*;
 import SuppressionVector.SupVec;
 import SuppressionVector.SupVec.PartialOutSeq;
-import Utils.Matrix;
 import Utils.Sequence;
+import Context.PContext;
 import Hierarchy.Hierarchy;
+import Hierarchy.Layer;
 
 public class GraphModel extends Model{
-	private ArrayList<Matrix> each_layer_transition;
-	private ArrayList<Matrix> inner_transition;
+	private ArrayList<Model> each_layer_transition; //for each layer of PContexts
+	private ArrayList<Model> inner_transition; //for the bottom layer
 	private Hierarchy h;
 	
 	public GraphModel(int cycle, ArrayList<Sequence> s, Hierarchy hi) {
 		super(cycle,s);
 		h = hi;
+		each_layer_transition = new ArrayList<Model>();
+		inner_transition = new ArrayList<Model>();
 	}
 
-	@Override
+	/*two parts:
+	 * 1:train each_layer model
+	 * 2:train bottom layer
+	 * */
 	public void train() {
-		h.train(observation);
-	}
+		/*part 1*/
+		Layer l;
+		Model lm,im;
+		Iterator<Layer> it = Hierarchy.structure.iterator();
+		Iterator<PContext> ip;
+		while (it.hasNext()) {
+			l = it.next();
+			lm = new FirstOrderMarkovModel(l.getPC());
+			lm.trainForLayer();
+			each_layer_transition.add(lm);
+			
+			/*part 2*/
+			ip = l.getPC().iterator();
+			while (ip.hasNext()) {
+				im = new FirstOrderMarkovModel();
+				im.setContextList(ip.next().getChildren());
+				im.trainForCList();
+				inner_transition.add(im);
+			}
+		}
+	}	
 	
 	@Override
 	public double getProb(int t, int index, int start, int index2) {
@@ -68,4 +94,30 @@ public class GraphModel extends Model{
 		return null;
 	}
 
+	@Override
+	public void trainForLayer() {
+
+	}
+	
+	public Model getLayerTransition(int i) {
+		return each_layer_transition.get(i);
+	}
+
+	public Model getInnerTransition(int i) {
+		return inner_transition.get(i);
+	}
+
+	public void setHierarchy(Hierarchy i) {
+		h = i;
+	}
+	
+	public Hierarchy getHierarchy() {
+		return h;
+	}
+
+	@Override
+	public void trainForCList() {
+		// TODO Auto-generated method stub
+		
+	}
 }

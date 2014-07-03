@@ -5,8 +5,10 @@
  * */
 package Hierarchy;
 
+
 public abstract class Tree extends Hierarchy{
 	public Tree(int i) {
 		layers = i;
 	}
+	
 }

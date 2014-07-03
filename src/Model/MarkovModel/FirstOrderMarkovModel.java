@@ -14,13 +14,22 @@ import Main.Maskit;
 import SuppressionVector.SupVec;
 import SuppressionVector.SupVec.PartialOutSeq;
 import Utils.*;
+import Context.*;
 
 public class FirstOrderMarkovModel extends MarkovModel{
+	public FirstOrderMarkovModel() {
+		
+	}
+	
 	public FirstOrderMarkovModel(ArrayList<Sequence> s, int cycle, int t) {
 		super(s,cycle,t);
 		setLongesttrace();
 	}
 	
+	public FirstOrderMarkovModel(ArrayList<PContext> s) {
+		super(s);
+	}
+
 	private void setLongesttrace() {
 		if (observation.size() <= 1) {
 			longesttrace = observation.get(0);
@@ -47,6 +56,148 @@ public class FirstOrderMarkovModel extends MarkovModel{
     		transition[i] = new double[M][M];
     	}
     }
+	
+
+	@Override
+	public void trainForCList() {
+		int start,end,time;
+    	setMN(Maskit.locids.size());
+    	allocateSpace();
+    	System.out.println("model.T "+T+" M "+M);
+    	ArrayList<Sequence>  pobservation = new ArrayList<Sequence>(); 
+    	
+    	Context c;
+    	Date date = new Date();
+		Date curdate = new Date();
+		Sequence pstemp = null;
+    	/*construct sequence for each day of each layer's pcontexts*/
+    	for (int i = 0; i < context_list.size(); i++) {
+    		c = context_list.get(i);
+    		curdate = c.getTimetmp();
+			if ((date == null) || (!curdate.equals(date))) {
+				pstemp = new Sequence();
+				pstemp.addContext(c);
+
+				pobservation.add(pstemp);
+				
+				date = c.getTimetmp();	
+				
+			} else {
+				pstemp.addContext(c);				
+			}
+    	}
+    	
+    	int startToN = 0;;
+    	for (int i = 0; i < pobservation.size(); i++) {
+			transition[0][0][pobservation.get(i).getContext(0).getHierarchyIndex()] += 1;
+			startToN += 1;
+		}
+    	transition[0][0][0] = 1.0;
+		for (int i = 1; i < M; i++) {
+			transition[0][0][i] /= startToN;
+			transition[T-1][i][Maskit.end_index] = 1.0;
+		}
+		
+		if (T > 2) {
+	    	int[][] sum_each_line = new int[T-1][M-1];
+	    	for (int j = 0; j < pobservation.size(); j++) {
+	    		for (int i = 0; i < pobservation.get(j).getLength()-1; i++) {
+	    			start = pobservation.get(j).getContext(i).getHierarchyIndex();
+	    			end = pobservation.get(j).getContext(i+1).getHierarchyIndex();
+	    			time = pobservation.get(j).getContext(i).getT(); 
+	    			System.out.println("time "+time+"start "+start+" end "+end);
+	    			if (time < T-1) {
+	    				transition[time][start][end] += 1;
+		    			sum_each_line[time][start] += 1;	
+	    			}
+	    		}
+	    	}
+	    	
+	    	for (int t = 1; t < transition.length-1; t++) {
+	    		for (int i = 1; i< M-1; i++) {
+	        		for (int j = 1; j < M-1; j++) {
+	        			if (sum_each_line[t][i] != 0) {
+	        				transition[t][i][j] /= sum_each_line[t][i];
+	        			} else {
+	        				transition[t][i][j] = 0;
+	        			}
+	        			
+	        		}
+	        	}	
+	    	}			
+		}		
+	}
+
+	@Override
+	public void trainForLayer() {
+		int start,end,time;
+    	setMN(Maskit.locids.size());
+    	allocateSpace();
+    	System.out.println("model.T "+T+" M "+M);
+    	ArrayList<PSequence>  pobservation = new ArrayList<PSequence>(); 
+    	
+    	PContext pc;
+    	Date date = new Date();
+		Date curdate = new Date();
+		PSequence pstemp = null;
+    	/*construct sequence for each day of each layer's pcontexts*/
+    	for (int i = 0; i < pcontext_list.size(); i++) {
+    		pc = pcontext_list.get(i);
+    		curdate = pc.getDate();
+			if ((date == null) || (!curdate.equals(date))) {
+				pstemp = new PSequence();
+				pstemp.addPContext(pc);
+
+				pobservation.add(pstemp);
+				
+				date = pc.getDate();	
+				
+			} else {
+				pstemp.addPContext(pc);				
+			}
+    	}
+    	
+    	int startToN = 0;;
+    	for (int i = 0; i < pobservation.size(); i++) {
+			transition[0][0][pobservation.get(i).getPContext(0).getHierarchyIndex()] += 1;
+			startToN += 1;
+		}
+    	transition[0][0][0] = 1.0;
+		for (int i = 1; i < M; i++) {
+			transition[0][0][i] /= startToN;
+			transition[T-1][i][Maskit.end_index] = 1.0;
+		}
+		
+		if (T > 2) {
+	    	int[][] sum_each_line = new int[T-1][M-1];
+	    	for (int j = 0; j < pobservation.size(); j++) {
+	    		for (int i = 0; i < pobservation.get(j).getLength()-1; i++) {
+	    			start = pobservation.get(j).getPContext(i).getHierarchyIndex();
+	    			end = pobservation.get(j).getPContext(i+1).getHierarchyIndex();
+	    			time = pobservation.get(j).getPContext(i).getT(); 
+	    			System.out.println("time "+time+"start "+start+" end "+end);
+	    			if (time < T-1) {
+	    				transition[time][start][end] += 1;
+		    			sum_each_line[time][start] += 1;	
+	    			}
+	    		}
+	    	}
+	    	
+	    	for (int t = 1; t < transition.length-1; t++) {
+	    		for (int i = 1; i< M-1; i++) {
+	        		for (int j = 1; j < M-1; j++) {
+	        			if (sum_each_line[t][i] != 0) {
+	        				transition[t][i][j] /= sum_each_line[t][i];
+	        			} else {
+	        				transition[t][i][j] = 0;
+	        			}
+	        			
+	        		}
+	        	}	
+	    	}			
+		}
+		
+	}
 	
 	public void trainWithStatistics (ArrayList<Sequence> s) {
     	int start,end,time;
@@ -335,4 +486,6 @@ public class FirstOrderMarkovModel extends MarkovModel{
 		}
 		return r;
 	}
+
+
 }

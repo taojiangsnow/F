@@ -5,7 +5,7 @@ package Context;
 
 import Utils.Date;
 
-public class Context extends PContext implements Cloneable{
+public class Context implements Cloneable{
 	protected String context;
 	protected Date timestamp;
 	protected int id;
@@ -131,6 +131,10 @@ public class Context extends PContext implements Cloneable{
 		}
 	}
 
+	public double getProbToParent() {
+		return prob_to_parent;
+	}
+	
 	public void setParent(PContext pContext) {
 		parent = pContext;
 	}
@@ -142,6 +146,10 @@ public class Context extends PContext implements Cloneable{
 
 	public void setProbToParent(double p) {
 		prob_to_parent = p;
+	}
+
+	public int getHierarchyIndex() {
+		return hierarchy_index;
 	}
 
 }
