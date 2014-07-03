@@ -61,10 +61,75 @@ public class Maskit {
 		}
 	}
 	
+	public void constructGlobalVar(ArrayList<Sequence> s) {
+		Maskit.locids = new ArrayList<Integer>(); //a set of location id
+		Maskit.scontext_id = new HashMap<String,Integer>(); 
+		
+		Maskit.locids.add(Maskit.start_index); //"start"		
+		Maskit.scontext_id.put("start", -1);
+		Maskit.scontext_id.put("end", -2);
+		
+		 /*construct sequence of different location id*/
+		 Sequence temps;
+		 Context t;
+		 for (int i = 0; i < s.size(); i++) {			 
+			 temps = s.get(i);
+			 for (int j = 0; j < temps.getLength(); j++) {
+				 t = temps.getContext(j);
+				 if (!Maskit.locids.contains(t.getId())) {
+					 Maskit.locids.add(t.getId());
+					 Maskit.scontext_id.put(t.getContext(), t.getId());
+				 }
+			 }
+		 }
+		 Maskit.end_index = Maskit.locids.size();
+		 Maskit.locids.add(Maskit.end_index); //"end"
+		 
+		 //***************set the index of context in transition matrix M and fine the max length of output sequence
+		 int start_T,end_T;
+		 Sequence stemp;
+		 start_T = s.get(0).getContext(0).getT();
+		 end_T = s.get(0).getLastContext().getT();
+		 for (int i = 0; i < s.size(); i++) {			 
+			 stemp = s.get(i);
+			 for (int j = 0; j < stemp.getLength(); j++) {
+				 t = stemp.getContext(j);
+				 t.setIndex(Maskit.locids.indexOf(t.getId()));
+				 if (t.getT() > end_T) {
+					 end_T = t.getT();
+				 }
+				 if (t.getT() < start_T) {
+					 start_T = t.getT();
+				 }
+			 }
+		 }
+		 start_T--;
+		 end_T++;
+		 System.out.println("start_T "+start_T+" end_T " + end_T);
+
+		 Maskit.T = Maskit.end_T = end_T - start_T;
+		 Maskit.mapping = new TimeMapContext(Maskit.T + 1);
+		 Maskit.mapping.add(Maskit.start_T, Maskit.start_index); //"start" at 0
+		 Maskit.mapping.add(Maskit.end_T, Maskit.end_index); //"end" at T+1
+		 
+		 /*set the mapping of T and index of contexts*/
+		 for (int i = 0; i < s.size(); i++) {
+			 temps = s.get(i);
+			 for (int j = 0; j < temps.getLength(); j++) {
+				 t = temps.getContext(j);
+				 t.setT(t.getT() - start_T);
+				 Maskit.mapping.add(t.getT(), t.getIndex());
+			 }
+		 }
+	}
+	
+	
+	
 	public static void main(String[] args) throws IOException, MatlabConnectionException, MatlabInvocationException {
 		Maskit m = new Maskit(3,1.0/3,Cycle.DAY,new SampleFrequentPointByTimeInterval(3600,0,24),new NumberOfReleasedContext());
 		DataLoader t = new TxtLoader("F:\\test\\test3b.txt");
 		t.getDataSet();
+		m.constructGlobalVar(t.getObservation());
 		t.output();
 		//System.out.println("Done data loading");
 		//****

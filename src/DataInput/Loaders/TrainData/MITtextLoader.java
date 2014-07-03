@@ -43,11 +43,12 @@ public class MITtextLoader extends TxtLoader{
 		int sec = 0;
 		int curlocid = 0;
 		int lineno = 1;
-		Maskit.locids = new ArrayList<Integer>(); //a set of location id
-		Maskit.scontext_id = new HashMap<String,Integer>(); 
-		Maskit.locids.add(Maskit.start_index); //"start"
-		Maskit.scontext_id.put("start", -1);
-	    Maskit.scontext_id.put("end", -2);
+		
+		//Maskit.locids = new ArrayList<Integer>(); //a set of location id
+		//Maskit.scontext_id = new HashMap<String,Integer>(); 
+		//Maskit.locids.add(Maskit.start_index); //"start"
+		//Maskit.scontext_id.put("start", -1);
+	    //Maskit.scontext_id.put("end", -2);
 	    
 		System.out.println("lines "+sumlines);
 		
@@ -120,60 +121,7 @@ public class MITtextLoader extends TxtLoader{
 			 observation.remove(i);
 			 observation.add(i, fs);
 		 }
-		 
-		 /*construct sequence of different location id*/
-		 Sequence temps;
-		 Context t;
-		 for (int i = 0; i < observation.size(); i++) {			 
-			 temps = observation.get(i);
-			 for (int j = 0; j < temps.getLength(); j++) {
-				 t = temps.getContext(j);
-				 if (!Maskit.locids.contains(t.getId())) {
-					 Maskit.locids.add(t.getId());
-					 Maskit.scontext_id.put(t.getContext(), t.getId());
-				 }
-			 }
-		 }
-		 Maskit.end_index = Maskit.locids.size();
-		 Maskit.locids.add(Maskit.end_index); //"end"
-		 
-		 //***************set the index of context in transition matrix M and fine the max length of output sequence
-		 int start_T,end_T;
-		 Sequence stemp;
-		 start_T = observation.get(0).getContext(0).getT();
-		 end_T = observation.get(0).getLastContext().getT();
-		 for (int i = 0; i < observation.size(); i++) {			 
-			 stemp = observation.get(i);
-			 for (int j = 0; j < stemp.getLength(); j++) {
-				 t = stemp.getContext(j);
-				 t.setIndex(Maskit.locids.indexOf(t.getId()));
-				 if (t.getT() > end_T) {
-					 end_T = t.getT();
-				 }
-				 if (t.getT() < start_T) {
-					 start_T = t.getT();
-				 }
-			 }
-		 }
-		 start_T--;
-		 end_T++;
-		 System.out.println("start_T "+start_T+" end_T " + end_T);
 
-		 Maskit.T = Maskit.end_T = end_T - start_T;
-		 Maskit.mapping = new TimeMapContext(Maskit.T + 1);
-		 Maskit.mapping.add(Maskit.start_T, Maskit.start_index); //"start" at 0
-		 Maskit.mapping.add(Maskit.end_T, Maskit.end_index); //"end" at T+1
-		 
-		 /*set the mapping of T and index of contexts*/
-		 for (int i = 0; i < observation.size(); i++) {
-			 temps = observation.get(i);
-			 for (int j = 0; j < temps.getLength(); j++) {
-				 t = temps.getContext(j);
-				 t.setT(t.getT() - start_T);
-				 Maskit.mapping.add(t.getT(), t.getIndex());
-			 }
-		 }
-		 
 		 for (int i = 0; i < Maskit.locids.size(); i++) {
 			 System.out.print(Maskit.locids.get(i) + "\t");
 			 if ((i != 0) && (i % 6 == 0)) {
