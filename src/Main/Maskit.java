@@ -19,6 +19,9 @@ import DataInput.Loaders.*;
 import DataInput.Loaders.SensitiveContext.TxtSensitiveContextSetLoader;
 import DataInput.Loaders.TrainData.DataLoader;
 import DataInput.Loaders.TrainData.TxtLoader;
+import Hierarchy.Hierarchy;
+import Hierarchy.MITtree;
+import Model.GraphModel.GraphModel;
 import Model.MarkovModel.FirstOrderMarkovModel;
 import Model.MarkovModel.MarkovModel;
 import Check.ProbabilisticPC;
@@ -127,7 +130,7 @@ public class Maskit {
 	
 	public static void main(String[] args) throws IOException, MatlabConnectionException, MatlabInvocationException {
 		Maskit m = new Maskit(3,1.0/3,Cycle.DAY,new SampleFrequentPointByTimeInterval(3600,0,24),new NumberOfReleasedContext());
-		DataLoader t = new TxtLoader("F:\\test\\test3b.txt");
+		DataLoader t = new TxtLoader("F:\\test\\ht3.txt");
 		t.getDataSet();
 		m.constructGlobalVar(t.getObservation());
 		t.output();
@@ -143,6 +146,14 @@ public class Maskit {
         }
         System.out.println();
         
+        Hierarchy hi = new MITtree(2);
+        hi.initial(t.getObservation());
+        
+        System.out.println("*********hierarchy construction done***********************");
+        PreferredSettings.model = new GraphModel(PreferredSettings.cycle,t.getObservation(),hi);
+        PreferredSettings.model.train();
+        ((GraphModel)PreferredSettings.model).output();
+        /***************
 		PreferredSettings.model = new FirstOrderMarkovModel(t.getObservation(),PreferredSettings.cycle, Maskit.T);
         PreferredSettings.model.train();
         ((MarkovModel) PreferredSettings.model).outputTransition("F:\\m.txt");
@@ -152,7 +163,7 @@ public class Maskit {
         System.out.println("**********fdsfsuppression vector training*************");
         SupVec.train(new GreedyTrain());
 
-        //******/
+
         //************Hybrid checking******************        
         Utility utility = new NumberOfReleasedContext();
         double utility_prob = utility.getUtility(SupVecTrain.p_best);

@@ -29,8 +29,9 @@ public abstract class MarkovModel extends Model{
 		T = t;
 	}
 	
-	public MarkovModel(ArrayList<PContext> s) {
+	public MarkovModel(ArrayList<PContext> s, int t) {
 		pcontext_list = s;
+		T = t;
 	}
 	
 	public abstract int getT();

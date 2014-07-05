@@ -52,15 +52,30 @@ public class PContext implements Cloneable{
 		children.add(c);
 	}
 	
-	public int findChild(int index){
-		for (int i = 0; i < children.size(); i++) {
-			if (children.get(i).getIndex() == index) {
-				return i;
+	public int findChild(Context c){
+		ArrayList<Integer> indexset = new ArrayList<Integer>();
+		Iterator<Context> it = children.iterator();
+		indexset.add(0); //¡°start¡± as default first child
+		
+		int i;
+		while (it.hasNext()) {
+			i = it.next().getIndex();
+			if (!indexset.contains(i)) {
+				indexset.add(i);
 			}
 		}
-		return -1;
+
+		return indexset.indexOf(c.getIndex());
 	}
 
+	public void outputChildren() {
+		Iterator<Context> it = children.iterator();
+		while (it.hasNext()) {
+			it.next().output();
+			System.out.println();
+		}
+	}
+	
 	public int getT() {
 		return T;
 	}
@@ -76,8 +91,35 @@ public class PContext implements Cloneable{
 	public Date getDate() {
 		return timestamp;
 	}
-
+	
 	public void setChildren(ArrayList<Context> array) {
-		children = array;
+		children = new ArrayList<Context>();
+		Iterator<Context> it = array.iterator();
+		while (it.hasNext()) {
+			children.add(it.next());
+		}
+	}
+
+	public void output() {
+		this.timestamp.output();
+		StringBuilder builder = new StringBuilder();
+		builder.append(this.T);
+		builder.append(" ");
+		builder.append(this.hierarchy_index);
+		System.out.print(builder);
+	}
+
+	public int getMaxChild() {
+		int max = children.get(0).hierarchy_index;
+		Iterator<Context> it = children.iterator();
+		int index;
+		while (it.hasNext()) {
+			index = it.next().hierarchy_index;
+			if (index > max) {
+				max = index;
+			}
+		}
+		
+		return max;
 	}
 }

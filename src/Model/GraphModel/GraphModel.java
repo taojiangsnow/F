@@ -1,8 +1,11 @@
 package Model.GraphModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
+import Main.Maskit;
 import Model.Model;
 import Model.MarkovModel.*;
 import SuppressionVector.SupVec;
@@ -14,14 +17,14 @@ import Hierarchy.Layer;
 
 public class GraphModel extends Model{
 	private ArrayList<Model> each_layer_transition; //for each layer of PContexts
-	private ArrayList<Model> inner_transition; //for the bottom layer
+	private HashMap<Integer,ArrayList<Model>> each_layer_inner_transition; //for each innernode's children
 	private Hierarchy h;
 	
 	public GraphModel(int cycle, ArrayList<Sequence> s, Hierarchy hi) {
 		super(cycle,s);
 		h = hi;
 		each_layer_transition = new ArrayList<Model>();
-		inner_transition = new ArrayList<Model>();
+		each_layer_inner_transition = new HashMap<Integer,ArrayList<Model>>();
 	}
 
 	/*two parts:
@@ -34,19 +37,51 @@ public class GraphModel extends Model{
 		Model lm,im;
 		Iterator<Layer> it = Hierarchy.structure.iterator();
 		Iterator<PContext> ip;
+		PContext pc;
+		
 		while (it.hasNext()) {
 			l = it.next();
-			lm = new FirstOrderMarkovModel(l.getPC());
-			lm.trainForLayer();
-			each_layer_transition.add(lm);
-			
-			/*part 2*/
-			ip = l.getPC().iterator();
-			while (ip.hasNext()) {
-				im = new FirstOrderMarkovModel();
-				im.setContextList(ip.next().getChildren());
-				im.trainForCList();
-				inner_transition.add(im);
+			if (l.getLayerIndex() != 1) { //skip the bottom layer
+				lm = new FirstOrderMarkovModel(l.getPcList(),Maskit.T);
+				((FirstOrderMarkovModel)lm).setMN(l.getMaxPcIndex()+2); //include "start" and "end"
+				lm.trainForLayer();
+				
+				each_layer_transition.add(lm);
+				
+				each_layer_inner_transition.put(l.getLayerIndex(), new ArrayList<Model>()); //include "start" and "end"
+				
+				each_layer_inner_transition.get(l.getLayerIndex()).add(null);
+				for (int i = 1; i < l.getMaxPcIndex()+1; i++) {
+					each_layer_inner_transition.get(l.getLayerIndex()).add(new FirstOrderMarkovModel());
+				}
+				each_layer_inner_transition.get(l.getLayerIndex()).add(null);
+				
+				System.out.println("each_layer_inner_transition"+each_layer_inner_transition.get(l.getLayerIndex()).size());
+				/*part 2*/
+				ip = l.getPcList().iterator();
+				HashSet<Integer> phindexlist = new HashSet<Integer>();
+				while (ip.hasNext()) {
+					pc = ip.next();
+					
+					/*we store one model of PContexts that have the same index, different T*/
+					if (phindexlist.contains(pc.getHierarchyIndex())) {
+						continue;
+					}
+					
+					im = new FirstOrderMarkovModel();
+					im.setContextList(pc.getChildren());
+					((FirstOrderMarkovModel)im).setT(Maskit.T);
+					((FirstOrderMarkovModel)im).setMN(pc.getMaxChild()+2);
+					
+					System.out.print("pc.hindex "+pc.getHierarchyIndex()+" "+" children.size "+(pc.getMaxChild()+2));
+					im.trainForCList();
+					//System.out.println("sdf"+each_layer_inner_transition.get(l.getLayerIndex()).size());
+					each_layer_inner_transition.get(l.getLayerIndex()).set(pc.getHierarchyIndex(), im);
+					
+					phindexlist.add(pc.getHierarchyIndex());
+				}
+			} else { // for bottom layer
+				each_layer_transition.add(null);
 			}
 		}
 	}	
@@ -103,10 +138,6 @@ public class GraphModel extends Model{
 		return each_layer_transition.get(i);
 	}
 
-	public Model getInnerTransition(int i) {
-		return inner_transition.get(i);
-	}
-
 	public void setHierarchy(Hierarchy i) {
 		h = i;
 	}
@@ -119,5 +150,42 @@ public class GraphModel extends Model{
 	public void trainForCList() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void output() {
+		Iterator<Integer> it = each_layer_inner_transition.keySet().iterator();
+		ArrayList<Model> mlist;
+		Iterator<Model> it2;
+		int indexlayer;
+		Model m;
+		
+		while (it.hasNext()) {
+			indexlayer = it.next();
+			
+			if (indexlayer == 1) {
+				continue;
+			}
+			
+			mlist = each_layer_inner_transition.get(indexlayer);
+			
+			it2 = mlist.iterator();
+			
+			System.out.println("*************layer "+indexlayer+" transition "+"**************************");
+			((MarkovModel)each_layer_transition.get(indexlayer-1)).output();
+			
+			System.out.println("*************layer "+indexlayer+" inner_transition "+"**************************");
+			int index2 = 0;
+			while (it2.hasNext()) {
+				m = it2.next(); 
+				if (m == null) {
+					index2++;
+					continue;
+				}
+
+				System.out.println("**********PC "+index2);
+				((MarkovModel)m).output();
+				index2++;
+			}
+		}		
 	}
 }

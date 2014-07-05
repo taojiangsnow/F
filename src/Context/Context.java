@@ -106,6 +106,7 @@ public class Context implements Cloneable{
 		builder.append(" ");
 		builder.append(this.index);
 		builder.append(" ");
+		builder.append(this.hierarchy_index);
 		System.out.print(builder);
 	}
 
@@ -114,6 +115,10 @@ public class Context implements Cloneable{
 		this.timestamp = null;
 	}
 
+	public boolean equals(Context c) {
+		return (c.getIndex()==index);
+	}
+	
 	public int getCell() {
 		// TODO Auto-generated method stub
 		if (context.contains(".")) {
@@ -125,7 +130,7 @@ public class Context implements Cloneable{
 	
 	public int getTower() {
 		if (context.contains(".")) {
-			return Integer.parseInt(context.substring(context.indexOf(".")));
+			return Integer.parseInt(context.substring(context.indexOf(".")+1));
 		} else {
 			return 0;
 		}
@@ -134,7 +139,7 @@ public class Context implements Cloneable{
 	public double getProbToParent() {
 		return prob_to_parent;
 	}
-	
+
 	public void setParent(PContext pContext) {
 		parent = pContext;
 	}

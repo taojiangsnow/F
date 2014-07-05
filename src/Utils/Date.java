@@ -116,4 +116,26 @@ public class Date {
 		System.out.print(this.year + "-" + this.month + "-" + this.day 
 						+ " " + this.hour + ":" + this.minute + ":" + this.sec + " ");
 	}
+
+	public int compare(Date b) {
+		if (this.year > b.getYear()) {
+			return 1;
+		} else if (this.year == b.getYear()) {
+			if (this.month > b.getMonth()) {
+				return 1;
+			} else if (this.month == b.getMonth()) {
+				if (this.day > b.getDay()) {
+					return 1;
+				} else if (this.day == b.getDay()) {
+					return 0;
+				} else {
+					return -1;
+				}
+			} else {
+				return -1;
+			}
+		} else {
+			return -1;
+		}
+	}
 }

@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import Main.Maskit;
 import SuppressionVector.SupVec;
@@ -26,8 +27,8 @@ public class FirstOrderMarkovModel extends MarkovModel{
 		setLongesttrace();
 	}
 	
-	public FirstOrderMarkovModel(ArrayList<PContext> s) {
-		super(s);
+	public FirstOrderMarkovModel(ArrayList<PContext> s, int t) {
+		super(s,t);
 	}
 
 	private void setLongesttrace() {
@@ -61,7 +62,6 @@ public class FirstOrderMarkovModel extends MarkovModel{
 	@Override
 	public void trainForCList() {
 		int start,end,time;
-    	setMN(Maskit.locids.size());
     	allocateSpace();
     	System.out.println("model.T "+T+" M "+M);
     	ArrayList<Sequence>  pobservation = new ArrayList<Sequence>(); 
@@ -70,10 +70,17 @@ public class FirstOrderMarkovModel extends MarkovModel{
     	Date date = new Date();
 		Date curdate = new Date();
 		Sequence pstemp = null;
+		int max_context_hindex = context_list.get(0).getHierarchyIndex();
+		
     	/*construct sequence for each day of each layer's pcontexts*/
     	for (int i = 0; i < context_list.size(); i++) {
     		c = context_list.get(i);
     		curdate = c.getTimetmp();
+    		
+    		if (c.getHierarchyIndex() > max_context_hindex) {
+    			max_context_hindex = c.getHierarchyIndex();
+    		}
+    		
 			if ((date == null) || (!curdate.equals(date))) {
 				pstemp = new Sequence();
 				pstemp.addContext(c);
@@ -95,7 +102,7 @@ public class FirstOrderMarkovModel extends MarkovModel{
     	transition[0][0][0] = 1.0;
 		for (int i = 1; i < M; i++) {
 			transition[0][0][i] /= startToN;
-			transition[T-1][i][Maskit.end_index] = 1.0;
+			transition[T-1][i][max_context_hindex + 1] = 1.0;
 		}
 		
 		if (T > 2) {
@@ -131,7 +138,6 @@ public class FirstOrderMarkovModel extends MarkovModel{
 	@Override
 	public void trainForLayer() {
 		int start,end,time;
-    	setMN(Maskit.locids.size());
     	allocateSpace();
     	System.out.println("model.T "+T+" M "+M);
     	ArrayList<PSequence>  pobservation = new ArrayList<PSequence>(); 
@@ -140,11 +146,18 @@ public class FirstOrderMarkovModel extends MarkovModel{
     	Date date = new Date();
 		Date curdate = new Date();
 		PSequence pstemp = null;
+		int max_pc_hindex = pcontext_list.get(0).getHierarchyIndex();
+		
     	/*construct sequence for each day of each layer's pcontexts*/
     	for (int i = 0; i < pcontext_list.size(); i++) {
     		pc = pcontext_list.get(i);
     		curdate = pc.getDate();
-			if ((date == null) || (!curdate.equals(date))) {
+    		
+    		if (pc.getHierarchyIndex() > max_pc_hindex) {
+    			max_pc_hindex = pc.getHierarchyIndex();
+    		}
+			
+    		if ((date == null) || (!curdate.equals(date))) {
 				pstemp = new PSequence();
 				pstemp.addPContext(pc);
 
@@ -157,15 +170,18 @@ public class FirstOrderMarkovModel extends MarkovModel{
 			}
     	}
     	
+    	transition[0][0][0] = 1.0;
+    	
     	int startToN = 0;;
     	for (int i = 0; i < pobservation.size(); i++) {
+    		System.out.println("i "+i+" psequence.length "+pobservation.get(i).getLength()+" "+pobservation.get(i).getPContext(0).getHierarchyIndex());
 			transition[0][0][pobservation.get(i).getPContext(0).getHierarchyIndex()] += 1;
 			startToN += 1;
 		}
-    	transition[0][0][0] = 1.0;
+    	
 		for (int i = 1; i < M; i++) {
 			transition[0][0][i] /= startToN;
-			transition[T-1][i][Maskit.end_index] = 1.0;
+			transition[T-1][i][max_pc_hindex + 1] = 1.0;
 		}
 		
 		if (T > 2) {
@@ -191,14 +207,13 @@ public class FirstOrderMarkovModel extends MarkovModel{
 	        			} else {
 	        				transition[t][i][j] = 0;
 	        			}
-	        			
 	        		}
 	        	}	
 	    	}			
 		}
 		
 	}
-	
+
 	public void trainWithStatistics (ArrayList<Sequence> s) {
     	int start,end,time;
     	setMN(Maskit.locids.size());
@@ -256,6 +271,10 @@ public class FirstOrderMarkovModel extends MarkovModel{
 	
 	public int getT() {
 		return T;
+	}
+	
+	public void setT(int t) {
+		T = t;
 	}
 		
     public void outputMatrix(double[][] p) {
